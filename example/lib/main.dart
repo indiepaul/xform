@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:xform/xform.dart';
+import 'dart:async';
 
 void main() => runApp(MyApp());
 
@@ -12,7 +13,7 @@ class _MyAppState extends State<MyApp> {
   GlobalKey scaffoldKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
-    _submit(formData) async {
+    Future _submit(formData) async {
       showDialog(
         context: scaffoldKey.currentState.context,
         builder: (BuildContext context) {
@@ -45,11 +46,36 @@ class _MyAppState extends State<MyApp> {
               XTextField(
                 name: "name",
                 label: "Name",
+                required: true,
               ),
               XTextField(
-                name: "value",
-                label: "Value",
+                name: "number",
+                label: "Number",
+                type: FieldType.numeric,
               ),
+              XTextField(
+                name: "email",
+                label: "Email Address",
+                type: FieldType.email,
+              ),
+              XTextField(
+                name: "password",
+                label: "Password",
+                type: FieldType.password,
+              ),
+            ]),
+            ListView(children: <Widget>[
+              XDateField(
+                name: "date",
+                label: "Date of Birth",
+                defaultValue: DateTime.now(),
+              ),
+              XSelectField(
+                name: "options",
+                label: "Options",
+                required: true,
+                options: [Option(name: "Name", value: "value")],
+              )
             ]),
           ]),
         ),
