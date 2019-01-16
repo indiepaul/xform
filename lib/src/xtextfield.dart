@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'xfocusnode.dart';
 import 'xformcontainer.dart';
-// import 'package:validate/validate.dart';
+import 'package:validate/validate.dart';
 
-enum FieldType { text, password, email, numeric, phone, textarea }
+enum FieldType { text, password, email, numeric, phone, textarea, date }
 
 class XTextField extends StatefulWidget {
   final String name;
@@ -14,16 +14,21 @@ class XTextField extends StatefulWidget {
   final bool required;
   final int minLength;
   final int maxLength;
-  XTextField({
-    this.name,
-    this.label,
-    this.type,
-    this.defaultValue,
-    this.placeholder,
-    this.required = false,
-    this.minLength,
-    this.maxLength,
-  });
+  final TextStyle style;
+  final InputDecoration decoration;
+  final Function validate;
+  XTextField(
+      {this.name,
+      this.label,
+      this.type,
+      this.defaultValue,
+      this.placeholder,
+      this.required = false,
+      this.minLength,
+      this.maxLength,
+      this.style,
+      this.validate,
+      this.decoration});
 
   @override
   XTextFieldState createState() {
@@ -34,6 +39,7 @@ class XTextField extends StatefulWidget {
 class XTextFieldState extends State<XTextField> {
   XFocusNode focusNode;
   TextInputType keyboardType;
+  InputDecoration decoration;
   @override
   void initState() {
     super.initState();
@@ -67,44 +73,58 @@ class XTextFieldState extends State<XTextField> {
   }
 
   _validate(String value) {
-    if (value.isNotEmpty) {
-      if (widget.type == FieldType.email) {
-        try {
-          // Validate.isEmail(value);
-        } catch (e) {
-          return '${widget.label ?? widget.name} must be a valid email address.';
-        }
-      }
-      if (widget.type == FieldType.phone) {
-        try {
-          // Validate.isAlphaNumeric(value);
-        } catch (e) {
-          return '${widget.label ?? widget.name} must be a valid phone number.';
-        }
-      }
-      if (widget.type == FieldType.numeric) {
-        try {
-          int.parse(value);
-        } catch (e) {
+    if (widget.validate != null) {
+      return widget.validate(value);
+    } else {
+      if (value.isNotEmpty) {
+        if (widget.type == FieldType.email) {
           try {
-            double.parse(value);
+            Validate.isEmail(value);
           } catch (e) {
-            return '${widget.label ?? widget.name} must be a number.';
+            return '${widget.label ?? widget.name} must be a valid email address.';
+          }
+        }
+        if (widget.type == FieldType.phone) {
+          try {
+            Validate.isAlphaNumeric(value);
+          } catch (e) {
+            return '${widget.label ?? widget.name} must be a valid phone number.';
+          }
+        }
+        if (widget.type == FieldType.numeric) {
+          try {
+            int.parse(value);
+          } catch (e) {
+            try {
+              double.parse(value);
+            } catch (e) {
+              return '${widget.label ?? widget.name} must be a number.';
+            }
           }
         }
       }
-    }
-    if (widget.minLength != null) {
-      if (value.length < widget.minLength) {
-        return '${widget.label ?? widget.name} must be atlease ${widget.minLength} characters long.';
+      if (widget.minLength != null) {
+        if (value.length < widget.minLength) {
+          return '${widget.label ?? widget.name} must be atlease ${widget.minLength} characters long.';
+        }
       }
     }
     if (widget.required && value.isEmpty) {
-      return "${widget.label ?? widget.name} should not be empty";
+      return "${widget.label ?? widget.name} is required";
     }
   }
 
   Widget build(BuildContext context) {
+    if (widget.decoration != null) {
+      decoration = widget.decoration.copyWith(
+          hintText:
+              widget.decoration.hintText ?? widget.placeholder ?? widget.label,
+          labelText: widget.decoration.labelText ?? widget.label);
+    } else {
+      decoration = InputDecoration(
+          hintText: widget.placeholder ?? widget.label,
+          labelText: widget.label);
+    }
     return TextFormField(
         autofocus: focusNode.autoFocus,
         focusNode: focusNode.focus,
@@ -118,8 +138,7 @@ class XTextFieldState extends State<XTextField> {
         validator: (value) => _validate(value),
         obscureText: widget.type == FieldType.password,
         keyboardType: keyboardType,
-        decoration: InputDecoration(
-            hintText: widget.placeholder ?? widget.label,
-            labelText: widget.label));
+        style: widget.style,
+        decoration: decoration);
   }
 }

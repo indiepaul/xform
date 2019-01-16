@@ -1,21 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
 import 'xfocusnode.dart';
 import 'xformcontainer.dart';
 
 class XDateField extends StatefulWidget {
   final String name;
   final String label;
-  Function onSaved;
+  final String placeholder;
+  final bool required;
   final DateTime defaultValue;
   final DateTime firstDate;
   final DateTime lastDate;
+  final TextStyle style;
+  final InputDecoration decoration;
+  final Function validate;
   XDateField(
       {this.name,
       this.label,
+      this.placeholder,
+      this.required = false,
       this.defaultValue,
       this.firstDate,
-      this.lastDate});
+      this.lastDate,
+      this.decoration,
+      this.validate,
+      this.style});
 
   @override
   XDateFieldState createState() {
@@ -26,6 +36,9 @@ class XDateField extends StatefulWidget {
 class XDateFieldState extends State<XDateField> {
   DateTime _selected;
   XFocusNode focusNode;
+  InputDecoration decoration;
+  final TextEditingController _controller = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -34,100 +47,93 @@ class XDateFieldState extends State<XDateField> {
         ? DateTime.parse(focusNode.defaultValue)
         : widget.defaultValue ?? null;
     _onSaved(_selected);
+    _controller.text = _selected != null
+        ? DateFormat.yMMMMd().format(_selected)
+        : widget.label ?? '';
+  }
+
+  Future _chooseDate(BuildContext context, String initialDateString) async {
+    var initialDate = widget.defaultValue ??
+        convertToDate(initialDateString) ??
+        DateTime.now();
+    var result = await showDatePicker(
+        context: context,
+        initialDate: initialDate,
+        firstDate: widget.firstDate ?? DateTime(1900),
+        lastDate: widget.lastDate ?? DateTime(initialDate.year + 100));
+    if (result == null) return;
+    _onSaved(result);
+  }
+
+  DateTime convertToDate(String input) {
+    try {
+      var d = DateFormat.yMMMMd().parseStrict(input);
+      return d;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  _validate(String value) {
+    if (widget.validate != null) {
+      return widget.validate(value);
+    }
+    var d = convertToDate(value);
+    if (d == null) {
+      return "Enter a valid date format";
+    }
+    if (widget.required && value.isEmpty) {
+      return "${widget.label ?? widget.name} is required";
+    }
   }
 
   _onSaved(picked) {
+    if (picked.runtimeType == String) {
+      picked = convertToDate(picked);
+    }
     if (picked != null) {
-      setState(() => _selected = picked);
-      print("saving: ${_selected} != null = ${_selected != null}");
+      setState(() {
+        _selected = picked;
+        _controller.text = DateFormat.yMMMMd().format(picked);
+      });
       XFormContainer.of(context).onSave(widget.name, picked.toString());
     }
   }
 
-  Future _selectDate() async {
-    DateTime picked = await showDatePicker(
-        context: context,
-        initialDate: widget.defaultValue ?? DateTime.now(),
-        firstDate: widget.firstDate ?? DateTime(2017),
-        lastDate: widget.lastDate ?? DateTime(2020));
-    if (picked != null) {
-      _onSaved(picked);
+  Widget build(BuildContext context) {
+    if (widget.decoration != null) {
+      decoration = widget.decoration.copyWith(
+          hintText:
+              widget.decoration.hintText ?? widget.placeholder ?? widget.label,
+          labelText: widget.decoration.labelText ?? widget.label);
+    } else {
+      decoration = InputDecoration(
+          hintText: widget.placeholder ?? widget.label,
+          labelText: widget.label);
     }
-  }
-
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(top: 30.0),
-      child: Ink(
-        decoration: BoxDecoration(
-            border:
-                Border(bottom: BorderSide(width: 1.0, color: Colors.black))),
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              _selected != null
-                  ? Text(
-                      widget.label ?? widget.name,
-                      style: TextStyle(color: Colors.black54, fontSize: 12.0),
-                    )
-                  : Container(),
-              InkWell(
-                  onTap: _selectDate,
-                  child: new Text(
-                    _selected != null
-                        ? DateFormat.yMMMEd().format(_selected)
-                        : widget.label,
-                    style: TextStyle(
-                        color:
-                            _selected != null ? Colors.black : Colors.black54,
-                        fontSize: 17.0),
-                  ))
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class FormNotes extends StatelessWidget {
-  final String title;
-  final String notes;
-  FormNotes({this.notes, this.title});
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        FormTitle(title),
-        Text(
-          notes,
-          style: TextStyle(fontSize: 20.0),
-        ),
-      ],
-    );
-  }
-}
-
-class FormTitle extends StatelessWidget {
-  final String title;
-  FormTitle(this.title);
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Text(
-          title,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5.0),
-          child: Divider(
-            color: Colors.black,
-            height: 2.0,
-          ),
-        ),
-      ],
-    );
+    return Row(children: <Widget>[
+      Expanded(
+          child: TextFormField(
+        autofocus: focusNode.autoFocus,
+        focusNode: focusNode.focus,
+        onSaved: _onSaved,
+        validator: (value) => _validate(value),
+        decoration: decoration,
+        controller: _controller,
+        onFieldSubmitted: (text) =>
+            XFormContainer.of(context).next(focusNode.focus),
+        textInputAction: focusNode.focus != null
+            ? TextInputAction.next
+            : TextInputAction.done,
+        keyboardType: TextInputType.datetime,
+      )),
+      IconButton(
+        icon: Icon(Icons.more_horiz),
+        tooltip: 'Choose date',
+        onPressed: (() {
+          _chooseDate(context, _controller.text);
+        }),
+      )
+    ]);
   }
 }
