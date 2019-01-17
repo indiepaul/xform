@@ -47,9 +47,8 @@ class XDateFieldState extends State<XDateField> {
         ? DateTime.parse(focusNode.defaultValue)
         : widget.defaultValue ?? null;
     _onSaved(_selected);
-    _controller.text = _selected != null
-        ? DateFormat.yMMMMd().format(_selected)
-        : widget.label ?? '';
+    _controller.text =
+        _selected != null ? DateFormat.yMMMMd().format(_selected) : '';
   }
 
   Future _chooseDate(BuildContext context, String initialDateString) async {
