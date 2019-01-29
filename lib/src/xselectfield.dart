@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'xfocusnode.dart';
 import 'xformcontainer.dart';
-
-class Option {
-  String name;
-  String value;
-  Option({this.name, this.value});
-}
+import 'option.dart';
 
 class XSelectField extends StatefulWidget {
   final String name;
@@ -99,17 +94,5 @@ class XSelectFieldState extends State<XSelectField> {
         );
       },
     );
-  }
-}
-
-class XCheckBox extends StatefulWidget {
-  @override
-  _XCheckBoxState createState() => _XCheckBoxState();
-}
-
-class _XCheckBoxState extends State<XCheckBox> {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
   }
 }
