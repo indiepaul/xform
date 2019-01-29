@@ -147,19 +147,16 @@ class XFormState extends State<XForm> {
       child: Form(
           key: _formKey,
           autovalidate: autoValidate,
-          child: Stack(
+          child: Column(
             children: <Widget>[
-              Positioned(
+              Flexible(
                 child: PageView(
                     physics: ScrollPhysics(),
                     controller: _controller,
                     children: widget.children),
               ),
-              Positioned(
+              Container(
                 child: _buildButtons(pages),
-                bottom: 10.0,
-                left: 0.0,
-                right: 0.0,
               ),
             ],
           )),
