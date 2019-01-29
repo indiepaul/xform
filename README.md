@@ -8,6 +8,9 @@ Simplifies form creation and management. Simply create form fields and the xform
 * XTextField - Your usual text field
 * XDateField - Text field with a date picker
 * XSelectField - Dropdown selection box
+* XCheckbox - Checkbox returning true or false values
+* XCheckboxGroup - Grouped checkboxes returning an array of the selected values
+* XRadioGroup - Grouped radio buttons
 
 ## Quick Start
 

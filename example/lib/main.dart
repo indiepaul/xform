@@ -13,13 +13,19 @@ class _MyAppState extends State<MyApp> {
   GlobalKey scaffoldKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
-    Future _submit(formData) async {
+    Future _submit(Map<String, dynamic> formData) async {
+      List<Widget> children = [];
+      formData.forEach((key, value) {
+        children.add(Text("$key: ${value.toString()} ${value.runtimeType}"));
+      });
       showDialog(
         context: scaffoldKey.currentState.context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text("Form Data"),
-            content: Text(formData.toString()),
+            content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: children),
             actions: <Widget>[
               FlatButton(
                 child: Text("Close"),
@@ -62,6 +68,30 @@ class _MyAppState extends State<MyApp> {
                 name: "password",
                 label: "Password",
                 type: FieldType.password,
+              ),
+            ]),
+            ListView(children: <Widget>[
+              XCheckbox(
+                name: "agree",
+                label: "I agree",
+                defaultValue: true,
+              ),
+              XRadioGroup(
+                name: 'radios',
+                selected: "male",
+                options: [
+                  Option(name: "Male", value: "male"),
+                  Option(name: "Female", value: "female"),
+                ],
+              ),
+              XCheckboxGroup(
+                name: 'favourite',
+                label: 'Favourite Food',
+                selected: ["cake"],
+                options: [
+                  Option(name: "Cake", value: "cake"),
+                  Option(name: "Candy", value: "candy"),
+                ],
               ),
             ]),
             ListView(children: <Widget>[
