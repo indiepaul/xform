@@ -57,11 +57,18 @@ class XFormState extends State<XForm> {
   nextPage() {
     _formKey.currentState.save();
     if (page != pages) {
-      setState(() {
-        page = page + 1;
-      });
-      _controller.animateToPage(page - 1,
-          curve: Curves.ease, duration: Duration(milliseconds: 200));
+      if (_formKey.currentState.validate()) {
+        setState(() {
+          autoValidate = false;
+          page = page + 1;
+        });
+        _controller.animateToPage(page - 1,
+            curve: Curves.ease, duration: Duration(milliseconds: 200));
+      } else {
+        setState(() {
+          autoValidate = true;
+        });
+      }
     } else {
       submit();
     }

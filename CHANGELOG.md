@@ -1,3 +1,9 @@
+## [0.2.0] - 9 Apr 2019
+* Date field returns date type
+* Numeric field returns numeric value
+* Added support for switch
+* Validation on page switch
+
 ## [0.1.2] - 29 Jan 2019
 * Fixed Form display on long forms to not overlap buttons
 * Added support for checkbox, checkboxgroup and radiogroup

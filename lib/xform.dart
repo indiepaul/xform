@@ -5,4 +5,6 @@ export 'src/xform.dart';
 export 'src/xradiogroup.dart';
 export 'src/xcheckboxgroup.dart';
 export 'src/xselectfield.dart';
+// export 'src/xslider.dart';
+export 'src/xswitch.dart';
 export 'src/xtextfield.dart';

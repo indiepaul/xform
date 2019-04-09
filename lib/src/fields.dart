@@ -44,7 +44,7 @@ class XDateFieldState extends State<XDateField> {
     super.initState();
     focusNode = XFormContainer.of(context).register(widget.name);
     _selected = focusNode.defaultValue != null
-        ? DateTime.parse(focusNode.defaultValue)
+        ? focusNode.defaultValue
         : widget.defaultValue ?? null;
     _onSaved(_selected);
     _controller.text =
@@ -95,7 +95,7 @@ class XDateFieldState extends State<XDateField> {
         _selected = picked;
         _controller.text = DateFormat.yMMMMd().format(picked);
       });
-      XFormContainer.of(context).onSave(widget.name, picked.toString());
+      XFormContainer.of(context).onSave(widget.name, picked);
     }
   }
 

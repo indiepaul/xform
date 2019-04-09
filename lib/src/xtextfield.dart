@@ -69,7 +69,12 @@ class XTextFieldState extends State<XTextField> {
   }
 
   _onSaved(text) {
-    XFormContainer.of(context).onSave(widget.name, text);
+    if (widget.type == FieldType.numeric) {
+      final n = num.tryParse(text);
+      XFormContainer.of(context).onSave(widget.name, n);
+    } else {
+      XFormContainer.of(context).onSave(widget.name, text);
+    }
   }
 
   _validate(String value) {
@@ -114,6 +119,17 @@ class XTextFieldState extends State<XTextField> {
     }
   }
 
+  String getInitialValue() {
+    if (widget.type == FieldType.numeric) {
+      if (focusNode.defaultValue != null) {
+        return focusNode.defaultValue.toString() ??
+            widget.defaultValue.toString();
+      }
+      return '';
+    }
+    return focusNode.defaultValue ?? widget.defaultValue;
+  }
+
   Widget build(BuildContext context) {
     if (widget.decoration != null) {
       decoration = widget.decoration.copyWith(
@@ -133,7 +149,7 @@ class XTextFieldState extends State<XTextField> {
         textInputAction: focusNode.focus != null
             ? TextInputAction.next
             : TextInputAction.done,
-        initialValue: focusNode.defaultValue ?? widget.defaultValue,
+        initialValue: getInitialValue(),
         onSaved: _onSaved,
         validator: (value) => _validate(value),
         obscureText: widget.type == FieldType.password,

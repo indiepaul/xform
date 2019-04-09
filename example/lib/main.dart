@@ -76,6 +76,11 @@ class _MyAppState extends State<MyApp> {
                 label: "I agree",
                 defaultValue: true,
               ),
+              XSwitch(
+                name: "switch",
+                label: "Flip Me",
+                defaultValue: true,
+              ),
               XRadioGroup(
                 name: 'radios',
                 selected: "male",
