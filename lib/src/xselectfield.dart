@@ -6,7 +6,7 @@ import 'option.dart';
 class XSelectField extends StatefulWidget {
   final String name;
   final String label;
-  final Option selected;
+  final String selected;
   final bool required;
   final List<Option> options;
   final Function onSaved;
@@ -27,7 +27,7 @@ class XSelectField extends StatefulWidget {
 }
 
 class XSelectFieldState extends State<XSelectField> {
-  String _selected = '';
+  String _selected;
   XFocusNode focusNode;
   InputDecoration decoration;
   String errorMsg;
@@ -35,12 +35,17 @@ class XSelectFieldState extends State<XSelectField> {
   void initState() {
     super.initState();
     focusNode = XFormContainer.of(context).register(widget.name);
-    _selected = focusNode.defaultValue;
-    _onSaved(_selected);
+    String val = focusNode.defaultValue == null
+        ? widget.selected
+        : focusNode.defaultValue;
+    _onSaved(val);
   }
 
-  _onSaved(text) {
-    XFormContainer.of(context).onSave(widget.name, text);
+  _onSaved(val) {
+    setState(() {
+      _selected = val;
+    });
+    XFormContainer.of(context).onSave(widget.name, val);
   }
 
   _validate(value) {

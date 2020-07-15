@@ -13,6 +13,7 @@ class XDateField extends StatefulWidget {
   final DateTime firstDate;
   final DateTime lastDate;
   final TextStyle style;
+  final Widget icon;
   final InputDecoration decoration;
   final Function validate;
   XDateField(
@@ -23,6 +24,7 @@ class XDateField extends StatefulWidget {
       this.defaultValue,
       this.firstDate,
       this.lastDate,
+      this.icon,
       this.decoration,
       this.validate,
       this.style});
@@ -78,7 +80,7 @@ class XDateFieldState extends State<XDateField> {
       return widget.validate(value);
     }
     var d = convertToDate(value);
-    if (d == null) {
+    if (widget.required && d == null) {
       return "Enter a valid date format";
     }
     if (widget.required && value.isEmpty) {
@@ -100,39 +102,41 @@ class XDateFieldState extends State<XDateField> {
   }
 
   Widget build(BuildContext context) {
+    if (focusNode.focus.hasFocus) {
+      focusNode.focus.unfocus();
+    }
     if (widget.decoration != null) {
       decoration = widget.decoration.copyWith(
+          icon: widget.icon ?? null,
           hintText:
               widget.decoration.hintText ?? widget.placeholder ?? widget.label,
           labelText: widget.decoration.labelText ?? widget.label);
     } else {
       decoration = InputDecoration(
+          icon: widget.icon ?? null,
           hintText: widget.placeholder ?? widget.label,
           labelText: widget.label);
     }
-    return Row(children: <Widget>[
-      Expanded(
+    return InkWell(
+      onTap: (() {
+        _chooseDate(context, _controller.text);
+      }),
+      child: IgnorePointer(
+          ignoring: true,
           child: TextFormField(
-        autofocus: focusNode.autoFocus,
-        focusNode: focusNode.focus,
-        onSaved: _onSaved,
-        validator: (value) => _validate(value),
-        decoration: decoration,
-        controller: _controller,
-        onFieldSubmitted: (text) =>
-            XFormContainer.of(context).next(focusNode.focus),
-        textInputAction: focusNode.focus != null
-            ? TextInputAction.next
-            : TextInputAction.done,
-        keyboardType: TextInputType.datetime,
-      )),
-      IconButton(
-        icon: Icon(Icons.more_horiz),
-        tooltip: 'Choose date',
-        onPressed: (() {
-          _chooseDate(context, _controller.text);
-        }),
-      )
-    ]);
+            autofocus: focusNode.autoFocus,
+            focusNode: focusNode.focus,
+            onSaved: _onSaved,
+            validator: (value) => _validate(value),
+            decoration: decoration,
+            controller: _controller,
+            onFieldSubmitted: (text) =>
+                XFormContainer.of(context).next(focusNode.focus),
+            textInputAction: focusNode.focus != null
+                ? TextInputAction.next
+                : TextInputAction.done,
+            keyboardType: TextInputType.datetime,
+          )),
+    );
   }
 }

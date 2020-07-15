@@ -4,16 +4,18 @@ class XFormContainer extends StatefulWidget {
   final Widget child;
   final Function register;
   final Function onSave;
+  final Function save;
   final Function next;
   XFormContainer(
       {@required this.child,
       @required this.register,
       @required this.onSave,
+      @required this.save,
       @required this.next});
 
   static XFormContainerState of(BuildContext context) {
     final XFormContainerState scope =
-        context.ancestorStateOfType(const TypeMatcher<XFormContainerState>());
+        context.findAncestorStateOfType<XFormContainerState>();
     return scope;
   }
 
@@ -34,6 +36,10 @@ class XFormContainerState extends State<XFormContainer> {
 
   next(focusNode) {
     return widget.next(focusNode);
+  }
+
+  save() {
+    return widget.save();
   }
 
   @override

@@ -54,10 +54,34 @@ class _MyAppState extends State<MyApp> {
                 label: "Name",
                 required: true,
               ),
+              Divider(height: 10.0),
               XTextField(
                 name: "number",
                 label: "Number",
                 type: FieldType.numeric,
+                // defaultValue: 4,
+              ),
+              XTextField(
+                name: "email",
+                label: "Email Address",
+                type: FieldType.email,
+              ),
+              XTextField(
+                name: "password",
+                label: "Password",
+                type: FieldType.password,
+              ),
+              XTextField(
+                name: "name",
+                label: "Name",
+                required: true,
+              ),
+              Divider(height: 10.0),
+              XTextField(
+                name: "number",
+                label: "Number",
+                type: FieldType.numeric,
+                // defaultValue: 4,
               ),
               XTextField(
                 name: "email",
@@ -83,7 +107,7 @@ class _MyAppState extends State<MyApp> {
               ),
               XRadioGroup(
                 name: 'radios',
-                selected: "male",
+                selected: "female",
                 options: [
                   Option(name: "Male", value: "male"),
                   Option(name: "Female", value: "female"),
@@ -109,6 +133,7 @@ class _MyAppState extends State<MyApp> {
                 name: "options",
                 label: "Options",
                 required: true,
+                selected: "value",
                 options: [Option(name: "Name", value: "value")],
               )
             ]),

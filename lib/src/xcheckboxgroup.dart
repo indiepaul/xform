@@ -54,6 +54,7 @@ class _XCheckboxGroupState extends State<XCheckboxGroup> {
       }
     } else {
       setState(() {
+        values.remove('');
         _values.addAll(values);
       });
     }
@@ -74,7 +75,7 @@ class _XCheckboxGroupState extends State<XCheckboxGroup> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(widget.label ?? ''),
+        widget.label != '' ? Text(widget.label ?? '') : Container(),
         Wrap(
             children: widget.options.map((Option option) {
           return Container(

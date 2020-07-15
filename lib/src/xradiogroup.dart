@@ -25,7 +25,7 @@ class XRadioGroup extends StatefulWidget {
 class _XRadioGroupState extends State<XRadioGroup> {
   XFocusNode focusNode;
   String errorMsg;
-  String _groupValue;
+  String _groupValue = '';
 
   @override
   void initState() {
@@ -38,9 +38,10 @@ class _XRadioGroupState extends State<XRadioGroup> {
   }
 
   _onSaved(val) {
-    setState(() {
-      _groupValue = val;
-    });
+    if (val != null)
+      setState(() {
+        _groupValue = val;
+      });
     XFormContainer.of(context).onSave(widget.name, _groupValue.toString());
   }
 
@@ -49,7 +50,7 @@ class _XRadioGroupState extends State<XRadioGroup> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(widget.label ?? ''),
+        widget.label != '' ? Text(widget.label ?? '') : Container(),
         Wrap(
             children: widget.options.map((Option option) {
           return Container(

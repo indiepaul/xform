@@ -9,14 +9,19 @@ class XTextField extends StatefulWidget {
   final String name;
   final String label;
   final String placeholder;
-  final String defaultValue;
+  final defaultValue;
   final FieldType type;
   final bool required;
   final int minLength;
   final int maxLength;
+  final Widget icon;
   final TextStyle style;
   final InputDecoration decoration;
   final Function validate;
+  final bool autocorrect;
+  final bool disabled;
+  final bool enableSuggestions;
+  final TextCapitalization textCapitalization;
   XTextField(
       {this.name,
       this.label,
@@ -28,7 +33,12 @@ class XTextField extends StatefulWidget {
       this.maxLength,
       this.style,
       this.validate,
-      this.decoration});
+      this.decoration,
+      this.icon,
+      this.textCapitalization,
+      this.disabled = false,
+      this.autocorrect = true,
+      this.enableSuggestions = true});
 
   @override
   XTextFieldState createState() {
@@ -91,7 +101,7 @@ class XTextFieldState extends State<XTextField> {
         }
         if (widget.type == FieldType.phone) {
           try {
-            Validate.isAlphaNumeric(value);
+            Validate.matchesPattern(value, RegExp(r'^[+]?\d*$'));
           } catch (e) {
             return '${widget.label ?? widget.name} must be a valid phone number.';
           }
@@ -114,6 +124,7 @@ class XTextFieldState extends State<XTextField> {
         }
       }
     }
+
     if (widget.required && value.isEmpty) {
       return "${widget.label ?? widget.name} is required";
     }
@@ -122,10 +133,11 @@ class XTextFieldState extends State<XTextField> {
   String getInitialValue() {
     if (widget.type == FieldType.numeric) {
       if (focusNode.defaultValue != null) {
-        return focusNode.defaultValue.toString() ??
-            widget.defaultValue.toString();
+        return focusNode.defaultValue.toString() ?? '';
       }
-      return '';
+      if (widget.defaultValue != null) {
+        return widget.defaultValue.toString() ?? '';
+      }
     }
     return focusNode.defaultValue ?? widget.defaultValue;
   }
@@ -133,28 +145,44 @@ class XTextFieldState extends State<XTextField> {
   Widget build(BuildContext context) {
     if (widget.decoration != null) {
       decoration = widget.decoration.copyWith(
+          icon: widget.icon ?? null,
           hintText:
               widget.decoration.hintText ?? widget.placeholder ?? widget.label,
+          filled: widget.disabled,
+          fillColor: Theme.of(context).disabledColor,
           labelText: widget.decoration.labelText ?? widget.label);
     } else {
       decoration = InputDecoration(
+          filled: widget.disabled,
+          fillColor: Theme.of(context).disabledColor,
+          icon: widget.icon ?? null,
           hintText: widget.placeholder ?? widget.label,
           labelText: widget.label);
     }
     return TextFormField(
+        readOnly: widget.disabled,
         autofocus: focusNode.autoFocus,
         focusNode: focusNode.focus,
-        onFieldSubmitted: (text) =>
-            XFormContainer.of(context).next(focusNode.focus),
+        onFieldSubmitted: (text) {
+          _onSaved(text);
+          XFormContainer.of(context).next(focusNode.focus);
+        },
         textInputAction: focusNode.focus != null
             ? TextInputAction.next
             : TextInputAction.done,
         initialValue: getInitialValue(),
+        textCapitalization:
+            widget.textCapitalization ?? TextCapitalization.none,
         onSaved: _onSaved,
         validator: (value) => _validate(value),
+        enableSuggestions:
+            widget.type == FieldType.email ? false : widget.enableSuggestions,
         obscureText: widget.type == FieldType.password,
         keyboardType: keyboardType,
+        maxLines: widget.type == FieldType.textarea ? 5 : 1,
         style: widget.style,
+        autocorrect:
+            widget.type == FieldType.email ? false : widget.autocorrect,
         decoration: decoration);
   }
 }
