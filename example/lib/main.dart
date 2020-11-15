@@ -59,29 +59,7 @@ class _MyAppState extends State<MyApp> {
                 name: "number",
                 label: "Number",
                 type: FieldType.numeric,
-                // defaultValue: 4,
-              ),
-              XTextField(
-                name: "email",
-                label: "Email Address",
-                type: FieldType.email,
-              ),
-              XTextField(
-                name: "password",
-                label: "Password",
-                type: FieldType.password,
-              ),
-              XTextField(
-                name: "name",
-                label: "Name",
-                required: true,
-              ),
-              Divider(height: 10.0),
-              XTextField(
-                name: "number",
-                label: "Number",
-                type: FieldType.numeric,
-                // defaultValue: 4,
+                defaultValue: 4,
               ),
               XTextField(
                 name: "email",
