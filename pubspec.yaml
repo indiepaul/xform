@@ -1,6 +1,6 @@
 name: xform
 description: A Flutter plugin for easy form building. Built in with textfield types, validation and pagination.
-version: 0.2.0
+version: 0.3.0
 author: Paul Mtali <paul.mtali@techie.com>
 homepage: https://github.com/indiepaul/xform
 

@@ -1,4 +1,6 @@
 ## [0.3.0] - 15 Jul 2020
+* Added time selection to date field
+* Changed Option value to dynamic
 * Added onSave callback
 * Added field icon
 * Added text capitalization toggle

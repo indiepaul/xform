@@ -105,7 +105,7 @@ class _MyAppState extends State<MyApp> {
               XDateField(
                 name: "date",
                 label: "Date of Birth",
-                defaultValue: DateTime.now(),
+                defaultValue: DateTime.parse('1992-01-01'),
               ),
               XSelectField(
                 name: "options",
