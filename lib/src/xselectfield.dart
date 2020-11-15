@@ -92,6 +92,7 @@ class XSelectFieldState extends State<XSelectField> {
                   _selected = newValue;
                 });
                 _onSaved(newValue);
+                widget.onSaved(newValue);
               },
               items: items,
             ),
