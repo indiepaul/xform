@@ -4,12 +4,15 @@ import 'dart:async';
 import 'xfocusnode.dart';
 import 'xformcontainer.dart';
 
+enum XDateFormat { date, time, datetime }
+
 class XDateField extends StatefulWidget {
   final String name;
   final String label;
   final String placeholder;
   final bool required;
   final DateTime defaultValue;
+  final XDateFormat format;
   final DateTime firstDate;
   final DateTime lastDate;
   final TextStyle style;
@@ -27,7 +30,8 @@ class XDateField extends StatefulWidget {
       this.icon,
       this.decoration,
       this.validate,
-      this.style});
+      this.style,
+      this.format = XDateFormat.date});
 
   @override
   XDateFieldState createState() {
@@ -37,6 +41,7 @@ class XDateField extends StatefulWidget {
 
 class XDateFieldState extends State<XDateField> {
   DateTime _selected;
+  TimeOfDay _tod;
   XFocusNode focusNode;
   InputDecoration decoration;
   final TextEditingController _controller = TextEditingController();
@@ -45,12 +50,38 @@ class XDateFieldState extends State<XDateField> {
   void initState() {
     super.initState();
     focusNode = XFormContainer.of(context).register(widget.name);
-    _selected = focusNode.defaultValue != null
-        ? focusNode.defaultValue
-        : widget.defaultValue ?? null;
-    _onSaved(_selected);
-    _controller.text =
-        _selected != null ? DateFormat.yMMMMd().format(_selected) : '';
+    switch (widget.format) {
+      case XDateFormat.date:
+        _selected = focusNode.defaultValue != null
+            ? focusNode.defaultValue
+            : widget.defaultValue ?? null;
+        _onSaved(_selected);
+        break;
+      case XDateFormat.time:
+        // _tod = focusNode.defaultValue != null
+        // ? focusNode.defaultValue
+        // : widget.defaultValue ?? null;
+        _tod = TimeOfDay(
+            hour: widget.defaultValue.hour, minute: widget.defaultValue.minute);
+        _onSaved(_tod);
+        break;
+      case XDateFormat.datetime:
+        _selected = focusNode.defaultValue != null
+            ? focusNode.defaultValue
+            : widget.defaultValue ?? null;
+        _selected = _selected.subtract(
+            Duration(hours: _selected.hour, minutes: _selected.minute));
+        _onSaved(_selected);
+        _tod = TimeOfDay(
+            hour: widget.defaultValue.hour, minute: widget.defaultValue.minute);
+        _onSaved(_tod);
+        break;
+      default:
+        _selected = focusNode.defaultValue != null
+            ? focusNode.defaultValue
+            : widget.defaultValue ?? null;
+        _onSaved(_selected);
+    }
   }
 
   Future _chooseDate(BuildContext context, String initialDateString) async {
@@ -66,9 +97,28 @@ class XDateFieldState extends State<XDateField> {
     _onSaved(result);
   }
 
+  Future _chooseTime(BuildContext context, String time) async {
+    var initialTime = TimeOfDay.now();
+    // var initialTime =
+    //     widget.defaultValue ?? convertToDate(time) ?? DateTime.now();
+    var result =
+        await showTimePicker(context: context, initialTime: initialTime);
+    if (result == null) return;
+    _onSaved(result);
+  }
+
   DateTime convertToDate(String input) {
     try {
       var d = DateFormat.yMMMMd().parseStrict(input);
+      return d;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  TimeOfDay convertToTime(String input) {
+    try {
+      var d = TimeOfDay.fromDateTime(DateTime.parse(input));
       return d;
     } catch (e) {
       return null;
@@ -79,10 +129,10 @@ class XDateFieldState extends State<XDateField> {
     if (widget.validate != null) {
       return widget.validate(value);
     }
-    var d = convertToDate(value);
-    if (widget.required && d == null) {
-      return "Enter a valid date format";
-    }
+    // var d = _selected;
+    // if (widget.required && d == null) {
+    //   return "Enter a valid date format";
+    // }
     if (widget.required && value.isEmpty) {
       return "${widget.label ?? widget.name} is required";
     }
@@ -92,13 +142,27 @@ class XDateFieldState extends State<XDateField> {
     if (picked.runtimeType == String) {
       picked = convertToDate(picked);
     }
-    if (picked != null) {
-      setState(() {
-        _selected = picked;
-        _controller.text = DateFormat.yMMMMd().format(picked);
-      });
-      XFormContainer.of(context).onSave(widget.name, picked);
+    if (picked != null && picked.runtimeType == DateTime) {
+      _selected = picked;
     }
+    if (picked != null && picked is TimeOfDay) {
+      _tod = picked;
+    }
+    var val;
+    setState(() {
+      if (_tod != null && _selected != null) {
+        val = _selected.add(Duration(hours: _tod.hour, minutes: _tod.minute));
+        _controller.text =
+            DateFormat.MMMMEEEEd().addPattern("jm", ', ').format(val);
+      } else if (_tod != null) {
+        val = _tod;
+        _controller.text = _tod.format(context);
+      } else if (_selected != null) {
+        val = _selected;
+        _controller.text = DateFormat.yMMMMd().format(_selected);
+      }
+    });
+    XFormContainer.of(context).onSave(widget.name, val);
   }
 
   Widget build(BuildContext context) {
@@ -118,8 +182,13 @@ class XDateFieldState extends State<XDateField> {
           labelText: widget.label);
     }
     return InkWell(
-      onTap: (() {
-        _chooseDate(context, _controller.text);
+      onTap: (() async {
+        if (widget.format == XDateFormat.date ||
+            widget.format == XDateFormat.datetime)
+          await _chooseDate(context, _controller.text);
+        if (widget.format == XDateFormat.time ||
+            widget.format == XDateFormat.datetime)
+          await _chooseTime(context, _controller.text);
       }),
       child: IgnorePointer(
           ignoring: true,
